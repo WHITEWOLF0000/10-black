@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Panel | Professional Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { min-height: 100vh; background: #0f172a; color: #f8fafc; display: flex; flex-direction: row; }
+        
+        /* Loader */
+        #loader-wrapper {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #0f172a; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 9999;
+            transition: opacity 0.5s, visibility 0.5s;
+        }
+        .loader {
+            width: 50px; height: 50px; border: 5px solid rgba(16, 185, 129, 0.1);
+            border-top: 5px solid #10b981; border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .loader-hidden { opacity: 0; visibility: hidden; }
+
+        /* Toast */
+        .toast {
+            position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
+            background: #10b981; color: white; padding: 15px 30px;
+            border-radius: 12px; font-weight: 600; z-index: 10000;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            transition: top 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            display: flex; align-items: center; gap: 10px; width: auto; min-width: 250px;
+        }
+        .toast.show { top: 30px; }
+        .toast.error { background: #fb7185; }
+
+        /* Sidebar - Desktop */
+        .sidebar { 
+            width: 280px; background: rgba(15, 23, 42, 0.95); 
+            backdrop-filter: blur(10px); border-right: 1px solid rgba(255, 255, 255, 0.1); 
+            padding: 30px; position: fixed; height: 100vh; display: flex; flex-direction: column;
+            z-index: 1000; transition: transform 0.3s ease;
+        }
+        .sidebar h2 { color: #10b981; margin-bottom: 40px; font-size: 22px; }
+        .nav-link { padding: 14px 18px; display: block; color: #94a3b8; text-decoration: none; cursor: pointer; border-radius: 12px; margin-bottom: 10px; transition: 0.3s; }
+        .nav-link:hover { background: rgba(255, 255, 255, 0.05); color: white; }
+        .nav-link.active { background: rgba(16, 185, 129, 0.1); color: #10b981; font-weight: 600; }
+        .logout-btn { color: #fb7185; border: 1px solid rgba(251, 113, 133, 0.2); margin-top: auto; margin-bottom: 20px; text-align: center; }
+        
+        /* Mobile Menu Toggle */
+        .menu-toggle {
+            display: none; position: fixed; top: 20px; right: 20px;
+            z-index: 1001; background: #10b981; color: white;
+            border: none; padding: 10px; border-radius: 8px; cursor: pointer;
+        }
+
+        /* Main Content */
+        .main-content { flex: 1; margin-left: 280px; padding: 40px; transition: 0.3s; width: 100%; }
+        .glass-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); padding: 30px; border-radius: 24px; overflow-x: auto; margin-bottom: 20px; }
+        
+        .week-indicator { 
+            background: rgba(16, 185, 129, 0.1); color: #10b981; 
+            padding: 5px 15px; border-radius: 20px; font-size: 12px; 
+            display: inline-block; margin-bottom: 15px; border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        th { text-align: center; padding: 12px; color: #94a3b8; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.1); text-transform: uppercase;}
+        td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); text-align: center; }
+        .std-name { text-align: left; min-width: 150px; }
+        
+        .day-input { 
+            width: 45px; padding: 6px; border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.3); 
+            background: rgba(0,0,0,0.2); color: white; text-align: center; outline: none; transition: 0.3s;
+        }
+        .avg-cell { font-weight: 600; color: #f59e0b; font-size: 16px; background: rgba(245, 158, 11, 0.05); border-radius: 8px; }
+
+        .attendance-toggle {
+            padding: 8px 16px; border-radius: 10px; border: none; cursor: pointer;
+            font-weight: 600; font-size: 12px; transition: 0.3s; width: 110px;
+        }
+        .status-present { background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); }
+        .status-absent { background: rgba(251, 113, 133, 0.1); color: #fb7185; border: 1px solid rgba(251, 113, 133, 0.2); }
+        
+        .save-btn {
+            background: #10b981; color: white; border: none; padding: 12px 25px;
+            border-radius: 12px; cursor: pointer; font-weight: 600; margin-top: 20px; transition: 0.3s; width: 100%; max-width: 300px;
+        }
+
+        .section { display: none; }
+        .section.active { display: block; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* MOBILE RESPONSIVE DESIGN */
+        @media (max-width: 992px) {
+            .sidebar { transform: translateX(-100%); width: 250px; }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { margin-left: 0; padding: 20px; padding-top: 70px; }
+            .menu-toggle { display: block; }
+            .glass-card { padding: 15px; border-radius: 16px; }
+            h1 { font-size: 20px; }
+            .toast { width: 90%; font-size: 14px; }
+        }
+
+        /* Table scroll hint for mobile */
+        .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        
+    </style>
+</head>
+<body>
+
+    <div id="loader-wrapper">
+        <div class="loader"></div>
+        <div class="loader-text" style="margin-top: 10px;">Tizim yuklanmoqda...</div>
+    </div>
+
+    <button class="menu-toggle" onclick="toggleSidebar()">☰ Menyu</button>
+
+    <div id="toast" class="toast">
+        <span id="toastIcon">✅</span>
+        <span id="toastMsg">Amal bajarildi!</span>
+    </div>
+
+    <div class="sidebar" id="sidebar">
+        <h2>SMART EDU</h2>
+        <div class="nav-link active" onclick="switchTab('home', this)">🏠 Jurnal</div>
+        <div class="nav-link" onclick="switchTab('attendance', this)">✅ Davomat</div>
+        <div class="nav-link" onclick="switchTab('rating', this)">📊 Reyting</div>
+        <div class="nav-link" onclick="switchTab('mock-tests', this)">📝 Mock testlari</div>
+        <div class="nav-link" onclick="switchTab('parents', this)">👪 Ota-onalar</div>
+        <a href="javascript:void(0)" class="nav-link logout-btn" onclick="logout()">Chiqish</a>
+    </div>
+
+    <div class="main-content">
+        <div id="home" class="section active">
+            <h1 id="teacherWelcome">Xush kelibsiz!</h1>
+            <div id="weekDisplay" class="week-indicator">Hafta: 1-Haftalik</div>
+            <p id="teacherSubject" style="color: #94a3b8; margin-bottom: 20px;">Fan: Yuklanmoqda...</p>
+            <div class="glass-card">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="std-name">O'quvchi</th>
+                                <th>Du</th><th>Se</th><th>Ch</th><th>Pa</th><th>Ju</th>
+                                <th style="color: #f59e0b;">O'rt.</th>
+                            </tr>
+                        </thead>
+                        <tbody id="gradingTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="attendance" class="section">
+            <h1>Kunlik Davomat</h1>
+            <div class="week-indicator" id="todayDateDisplay">Bugun: --.--.----</div>
+            <div class="glass-card">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="std-name">O'quvchi</th>
+                                <th>Holat</th>
+                                <th>Ma'lumot</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attendanceTableBody"></tbody>
+                    </table>
+                </div>
+                <button class="save-btn" onclick="saveFullAttendance()">Davomatni Saqlash</button>
+            </div>
+        </div>
+
+        <div id="rating" class="section">
+            <h1>Sinf Reytingi</h1>
+            <div class="glass-card">
+                <div class="table-container">
+                    <table>
+                        <thead><tr><th>O'rin</th><th>O'quvchi</th><th>Ball</th></tr></thead>
+                        <tbody id="ratingTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="mock-tests" class="section">
+            <h1>📝 Mock testlari</h1>
+            <div class="glass-card">
+                <div style="text-align: center; padding: 40px 10px;">
+                    <span style="font-size: 40px;">📄</span>
+                    <h3 style="color: #f8fafc;">Testlar mavjud emas</h3>
+                    <button class="save-btn">+ Yangi test</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="parents" class="section">
+            <h1>Ota-onalar</h1>
+            <div class="glass-card">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="text-align: left;">O'quvchi</th>
+                                <th style="text-align: left;">Ota-onasi</th>
+                                <th>Holat</th>
+                            </tr>
+                        </thead>
+                        <tbody id="parentTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- MOBIL MENYU FUNKSIYASI ---
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        // --- TABLARNI ALMASHTIRISH (MOBILDA YOPILISHI BILAN) ---
+        function switchTab(id, el) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            el.classList.add('active');
+            
+            // Mobil menyuni yopish
+            document.getElementById('sidebar').classList.remove('open');
+            
+            if(id === 'home') renderGrading();
+            if(id === 'attendance') renderAttendance();
+            if(id === 'rating') renderRating();
+            if(id === 'parents') renderParents();
+        }
+
+        const days = ['mon', 'tue', 'wed', 'thu', 'fri'];
+        let dailyAttendance = {}; 
+
+        function showToast(msg, type = "success") {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = msg;
+            document.getElementById('toastIcon').innerText = (type === "success") ? "✅" : "❌";
+            type === "error" ? toast.classList.add('error') : toast.classList.remove('error');
+            toast.classList.add('show');
+            setTimeout(() => { toast.classList.remove('show'); }, 3000);
+        }
+
+        function getStudentsFromDB() {
+            const allUsers = JSON.parse(localStorage.getItem('usersList')) || [];
+            return allUsers.filter(u => u.role === 'student');
+        }
+
+        window.onload = function() {
+            const user = JSON.parse(localStorage.getItem('currentUser'));
+            if (!user || user.role !== 'teacher') {
+                window.location.href = 'login.html';
+                return;
+            }
+            document.getElementById('todayDateDisplay').innerText = "Bugun: " + new Date().toLocaleDateString('uz-UZ');
+            document.getElementById('teacherWelcome').innerText = "Salom, " + user.fullName.split(' ')[0];
+            document.getElementById('teacherSubject').innerText = "Fan: " + (user.info || "Aniq fanlar");
+            renderGrading();
+            setTimeout(() => document.getElementById("loader-wrapper").classList.add("loader-hidden"), 800);
+        };
+
+        function renderGrading() {
+            const students = getStudentsFromDB();
+            const journal = JSON.parse(localStorage.getItem('journalData')) || {};
+            const tbody = document.getElementById('gradingTable');
+            tbody.innerHTML = students.map(s => {
+                const sGrades = journal[s.login] || {};
+                let sum = 0, count = 0;
+                const dayInputs = days.map(day => {
+                    const val = sGrades[day] || "";
+                    if(val !== "") { sum += Number(val); count++; }
+                    return `<td><input type="number" class="day-input" value="${val}" min="1" max="5" onchange="saveGrade('${s.login}', '${day}', this)"></td>`;
+                }).join('');
+                const avg = count > 0 ? (sum / count).toFixed(1) : "0.0";
+                return `<tr><td class="std-name"><b>${s.fullName}</b></td>${dayInputs}<td class="avg-cell">${avg}</td></tr>`;
+            }).join('');
+        }
+
+        function saveGrade(login, day, input) {
+            let journal = JSON.parse(localStorage.getItem('journalData')) || {};
+            if(!journal[login]) journal[login] = {};
+            if(input.value !== "" && (input.value < 1 || input.value > 5)) {
+                showToast("1-5 oralig'ida kiriting!", "error");
+                input.value = ""; return;
+            }
+            journal[login][day] = input.value !== "" ? Number(input.value) : "";
+            localStorage.setItem('journalData', JSON.stringify(journal));
+            renderGrading();
+            showToast("Ball saqlandi");
+        }
+
+        function renderAttendance() {
+            const students = getStudentsFromDB();
+            const today = new Date().toISOString().split('T')[0];
+            const attendanceDB = JSON.parse(localStorage.getItem('attendanceData')) || {};
+            const todayData = attendanceDB[today] || {};
+            document.getElementById('attendanceTableBody').innerHTML = students.map(s => {
+                const isPresent = todayData[s.login] === undefined ? true : todayData[s.login];
+                dailyAttendance[s.login] = isPresent;
+                return `<tr><td class="std-name">${s.fullName}</td><td><button id="btn-${s.login}" class="attendance-toggle ${isPresent ? 'status-present' : 'status-absent'}" onclick="toggleAttendance('${s.login}')">${isPresent ? '✅ Keldi' : '❌ Kelmadi'}</button></td><td style="font-size: 10px;">${todayData[s.login] !== undefined ? 'Saqlangan' : '-'}</td></tr>`;
+            }).join('');
+        }
+
+        function toggleAttendance(login) {
+            dailyAttendance[login] = !dailyAttendance[login];
+            const btn = document.getElementById(`btn-${login}`);
+            btn.innerText = dailyAttendance[login] ? '✅ Keldi' : '❌ Kelmadi';
+            btn.className = `attendance-toggle ${dailyAttendance[login] ? 'status-present' : 'status-absent'}`;
+        }
+
+        function saveFullAttendance() {
+            const today = new Date().toISOString().split('T')[0];
+            const attendanceDB = JSON.parse(localStorage.getItem('attendanceData')) || {};
+            attendanceDB[today] = dailyAttendance;
+            localStorage.setItem('attendanceData', JSON.stringify(attendanceDB));
+            showToast("Davomat saqlandi!");
+            renderAttendance();
+        }
+
+        function renderRating() {
+            const students = getStudentsFromDB();
+            const journal = JSON.parse(localStorage.getItem('journalData')) || {};
+            const ratingList = students.map(s => {
+                const sGrades = journal[s.login] || {};
+                let sum = 0, count = 0;
+                days.forEach(d => { if(sGrades[d]) { sum += Number(sGrades[d]); count++; } });
+                return { name: s.fullName, avg: count > 0 ? (sum / count) : 0 };
+            }).sort((a, b) => b.avg - a.avg);
+            document.getElementById('ratingTable').innerHTML = ratingList.map((s, i) => `<tr><td>${i + 1}</td><td style="text-align:left">${s.name}</td><td style="color:#10b981; font-weight:600">${s.avg.toFixed(1)}</td></tr>`).join('');
+        }
+
+        function renderParents() {
+            const students = getStudentsFromDB();
+            const allUsers = JSON.parse(localStorage.getItem('usersList')) || [];
+            const parents = allUsers.filter(u => u.role === 'parent');
+            document.getElementById('parentTable').innerHTML = students.map(s => {
+                const parent = parents.find(p => p.info === s.login);
+                return `<tr><td style="text-align:left">${s.fullName}</td><td style="text-align:left">${parent ? parent.fullName : 'Yo\'q'}</td><td>${parent ? '✅' : '⏳'}</td></tr>`;
+            }).join('');
+        }
+
+        function logout() { 
+            localStorage.removeItem('currentUser'); 
+            window.location.href = 'login.html'; 
+        }
+    </script>
+</body>
+</html>

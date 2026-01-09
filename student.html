@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>O'quvchi Paneli | Smart Edu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { min-height: 100vh; background: #0f172a; color: #f8fafc; display: flex; flex-direction: row; }
+
+        /* --- LOADER STYLE --- */
+        #loader-wrapper {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #0f172a; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 9999;
+            transition: opacity 0.5s, visibility 0.5s;
+        }
+        .loader {
+            width: 50px; height: 50px; border: 5px solid rgba(16, 185, 129, 0.1);
+            border-top: 5px solid #10b981; border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .loader-hidden { opacity: 0; visibility: hidden; }
+
+        /* --- SIDEBAR (Desktop) --- */
+        .sidebar { 
+            width: 280px; background: rgba(15, 23, 42, 0.95); 
+            backdrop-filter: blur(10px); border-right: 1px solid rgba(255, 255, 255, 0.1); 
+            padding: 30px; position: fixed; height: 100vh; display: flex; flex-direction: column;
+            z-index: 1000; transition: 0.3s ease;
+        }
+        .sidebar h2 { color: #10b981; margin-bottom: 40px; font-size: 22px; letter-spacing: 1px; }
+        .nav-link { padding: 14px 18px; display: block; color: #94a3b8; text-decoration: none; cursor: pointer; border-radius: 12px; margin-bottom: 10px; transition: 0.3s; }
+        .nav-link:hover { background: rgba(255, 255, 255, 0.05); color: white; }
+        .nav-link.active { background: rgba(16, 185, 129, 0.1); color: #10b981; font-weight: 600; }
+        .logout-btn { color: #fb7185; border: 1px solid rgba(251, 113, 133, 0.2); margin-top: auto; margin-bottom: 20px; text-align: center;}
+
+        /* --- MOBILE TOGGLE --- */
+        .mobile-header {
+            display: none; position: fixed; top: 0; left: 0; width: 100%;
+            background: #0f172a; padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.1);
+            z-index: 999; justify-content: space-between; align-items: center;
+        }
+        .menu-btn { background: #10b981; border: none; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; }
+
+        /* --- MAIN CONTENT --- */
+        .main-content { flex: 1; margin-left: 280px; padding: 40px; transition: 0.3s; width: 100%; }
+        .glass-card { 
+            background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); 
+            padding: 30px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); 
+            margin-bottom: 20px; overflow-x: auto;
+        }
+        
+        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: rgba(255, 255, 255, 0.05); padding: 25px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); text-align: center; }
+        .stat-card h3 { font-size: 14px; color: #94a3b8; margin-bottom: 10px; text-transform: uppercase; }
+        .stat-card p { font-size: 28px; font-weight: 600; color: #10b981; }
+
+        /* Tables */
+        table { width: 100%; border-collapse: collapse; min-width: 500px; }
+        th { text-align: center; padding: 15px; color: #94a3b8; font-size: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); text-transform: uppercase; }
+        td { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); text-align: center; font-size: 14px; }
+        
+        /* Schedule */
+        .schedule-table td { height: 70px; }
+        .time-cell { color: #10b981; font-weight: 600; width: 100px; background: rgba(16, 185, 129, 0.05); }
+        .time-sub { display: block; font-size: 10px; color: #64748b; font-weight: 400; }
+        .subject-box { display: block; font-weight: 600; color: #f8fafc; }
+        .room-box { display: block; font-size: 11px; color: #10b981; margin-top: 4px; }
+
+        .grade-badge { 
+            display: inline-block; width: 40px; height: 40px; line-height: 40px; 
+            border-radius: 10px; background: rgba(16, 185, 129, 0.2); color: #10b981; font-weight: 600; font-size: 18px;
+        }
+
+        .section { display: none; }
+        .section.active { display: block; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- RESPONSIVE MEDIA QUERIES --- */
+        @media (max-width: 992px) {
+            .sidebar { transform: translateX(-100%); width: 260px; }
+            .sidebar.open { transform: translateX(0); }
+            .mobile-header { display: flex; }
+            .main-content { margin-left: 0; padding: 20px; padding-top: 80px; }
+            .stat-grid { grid-template-columns: 1fr 1fr; }
+            .glass-card { padding: 20px; }
+        }
+
+        @media (max-width: 600px) {
+            .stat-grid { grid-template-columns: 1fr; }
+            .stat-card { padding: 15px; }
+            .stat-card p { font-size: 22px; }
+            h1 { font-size: 22px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loader-wrapper">
+        <div class="loader"></div>
+        <div class="loader-text" style="margin-top: 15px; color: #94a3b8;">Profilingiz tayyorlanmoqda...</div>
+    </div>
+
+    <div class="mobile-header">
+        <h3 style="color: #10b981;">SMART EDU</h3>
+        <button class="menu-btn" onclick="toggleMenu()">☰ Menyu</button>
+    </div>
+
+    <div class="sidebar" id="sidebar">
+        <h2>SMART EDU</h2>
+        <div class="nav-link active" onclick="switchTab('dashboard', this)">🏠 Baholarim</div>
+        <div class="nav-link" onclick="switchTab('schedule', this)">📅 Dars jadvali</div>
+        <div class="nav-link" onclick="switchTab('rating', this)">📊 Sinf reytingi</div>
+        <div class="nav-link" onclick="switchTab('exams', this)">📝 Imtihonlar</div>
+        <a href="javascript:void(0)" class="nav-link logout-btn" onclick="logout()">Chiqish</a>
+    </div>
+
+    <div class="main-content">
+        <div id="dashboard" class="section active">
+            <h1 id="studentName">Salom!</h1>
+            <p style="color: #94a3b8; margin-bottom: 25px;">Bugungi natijalaringiz</p>
+
+            <div class="stat-grid">
+                <div class="stat-card">
+                    <h3>O'rtacha</h3>
+                    <p id="avgDisplay">0.0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>O'rningiz</h3>
+                    <p id="rankDisplay">--</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Faollik</h3>
+                    <p style="color: #f59e0b;">A'lo</p>
+                </div>
+            </div>
+
+            <div class="glass-card">
+                <h3 style="margin-bottom: 20px; font-size: 16px; color: #10b981;">Haftalik baholar</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Du</th><th>Se</th><th>Ch</th><th>Pa</th><th>Ju</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentGradesBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="schedule" class="section">
+            <h1>📅 Dars jadvali</h1>
+            <div class="glass-card">
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th>Vaqt</th><th>Du</th><th>Se</th><th>Ch</th><th>Pa</th><th>Ju</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="time-cell">1-dars <span class="time-sub">08:30</span></td>
+                            <td><span class="subject-box">Matem.</span></td>
+                            <td><span class="subject-box">Ona tili</span></td>
+                            <td><span class="subject-box">Fizika</span></td>
+                            <td><span class="subject-box">Tarix</span></td>
+                            <td><span class="subject-box">Ingliz</span></td>
+                        </tr>
+                        <tr>
+                            <td class="time-cell">2-dars <span class="time-sub">09:25</span></td>
+                            <td><span class="subject-box">Matem.</span></td>
+                            <td><span class="subject-box">Kimyo</span></td>
+                            <td><span class="subject-box">Geom.</span></td>
+                            <td><span class="subject-box">Sport</span></td>
+                            <td><span class="subject-box">Rus tili</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="rating" class="section">
+            <h1>📊 Sinf Reytingi</h1>
+            <div class="glass-card">
+                <table id="ratingTable">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">#</th>
+                            <th style="text-align: left;">Ism</th>
+                            <th>Ball</th>
+                        </tr>
+                    </thead>
+                    <tbody id="fullRatingBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="exams" class="section">
+            <h1>📝 Imtihonlar</h1>
+            <div class="glass-card">
+                <p style="color: #94a3b8; text-align: center; padding: 20px;">Hozircha imtihonlar yo'q.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleMenu() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        const days = ['mon', 'tue', 'wed', 'thu', 'fri'];
+
+        function getAllStudents() {
+            const allUsers = JSON.parse(localStorage.getItem('usersList')) || [];
+            return allUsers.filter(u => u.role === 'student');
+        }
+
+        window.onload = function() {
+            const user = JSON.parse(localStorage.getItem('currentUser'));
+            if (!user) { window.location.href = 'login.html'; return; }
+            
+            document.getElementById('studentName').innerText = "Salom, " + user.fullName.split(' ')[0] + "!";
+            renderStudentData(user.login);
+            
+            setTimeout(() => {
+                document.getElementById("loader-wrapper").classList.add("loader-hidden");
+            }, 800);
+        };
+
+        function renderStudentData(currentLogin) {
+            const students = getAllStudents();
+            const journal = JSON.parse(localStorage.getItem('journalData')) || {};
+            
+            const ratingList = students.map(s => {
+                const sGrades = journal[s.login] || {};
+                let sSum = 0, sCount = 0;
+                days.forEach(d => { 
+                    if(sGrades[d]) { sSum += Number(sGrades[d]); sCount++; } 
+                });
+                return { 
+                    login: s.login, 
+                    fullName: s.fullName, 
+                    avg: sCount > 0 ? (sSum / sCount) : 0 
+                };
+            }).sort((a, b) => b.avg - a.avg);
+
+            document.getElementById('fullRatingBody').innerHTML = ratingList.map((s, i) => `
+                <tr style="${s.login === currentLogin ? 'background:rgba(16,185,129,0.1);' : ''}">
+                    <td>#${i + 1}</td>
+                    <td style="text-align:left">${s.fullName.split(' ')[0]} ${s.login === currentLogin ? '⭐' : ''}</td>
+                    <td style="color:#10b981; font-weight:600">${s.avg.toFixed(1)}</td>
+                </tr>
+            `).join('');
+
+            const myRank = ratingList.findIndex(s => s.login === currentLogin) + 1;
+            const myData = ratingList.find(s => s.login === currentLogin);
+            
+            document.getElementById('avgDisplay').innerText = myData ? myData.avg.toFixed(1) : "0.0";
+            document.getElementById('rankDisplay').innerText = myRank > 0 ? myRank + "-o'rin" : "--";
+
+            const myGrades = journal[currentLogin] || {};
+            const gradesHTML = days.map(day => {
+                const val = myGrades[day];
+                return val ? `<td><span class="grade-badge">${val}</span></td>` : `<td>-</td>`;
+            }).join('');
+            document.getElementById('studentGradesBody').innerHTML = `<tr>${gradesHTML}</tr>`;
+        }
+
+        function switchTab(id, el) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            el.classList.add('active');
+            
+            // Mobil menyuni yopish
+            document.getElementById('sidebar').classList.remove('open');
+            
+            const user = JSON.parse(localStorage.getItem('currentUser'));
+            if(user) renderStudentData(user.login);
+        }
+
+        function logout() {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>
