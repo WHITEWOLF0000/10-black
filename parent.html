@@ -501,7 +501,7 @@
             const user = JSON.parse(localStorage.getItem('currentUser'));
 
             if (!user || user.role !== 'parent') {
-                window.location.href = 'login.html';
+                window.location.href = 'index.html';
                 return;
             }
 
@@ -565,7 +565,7 @@
 
         function logout() {
             localStorage.removeItem('currentUser');
-            window.location.href = 'login.html';
+            window.location.href = 'index.html';
         }
     </script>
 </body>

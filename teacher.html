@@ -258,7 +258,7 @@
         window.onload = function() {
             const user = JSON.parse(localStorage.getItem('currentUser'));
             if (!user || user.role !== 'teacher') {
-                window.location.href = 'login.html';
+                window.location.href = 'index.html';
                 return;
             }
             document.getElementById('todayDateDisplay').innerText = "Bugun: " + new Date().toLocaleDateString('uz-UZ');
@@ -350,7 +350,7 @@
 
         function logout() { 
             localStorage.removeItem('currentUser'); 
-            window.location.href = 'login.html'; 
+            window.location.href = 'index.html'; 
         }
     </script>
 </body>

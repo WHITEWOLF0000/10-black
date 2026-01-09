@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kirish | Smart Edu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { min-height: 100vh; background: radial-gradient(circle at top right, #1e293b, #0f172a); display: flex; justify-content: center; align-items: center; color: white; overflow: hidden; }
+        
+        #loader-wrapper { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; transition: 0.5s; }
+        .loader { width: 50px; height: 50px; border: 5px solid rgba(16, 185, 129, 0.1); border-top: 5px solid #10b981; border-radius: 50%; animation: spin 1s linear infinite; }
+        .loader-text { margin-top: 20px; color: #10b981; font-size: 14px; letter-spacing: 2px; text-transform: uppercase; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .loader-hidden { opacity: 0; visibility: hidden; }
+
+        .login-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); padding: 40px; border-radius: 28px; width: 100%; max-width: 400px; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5); text-align: center; }
+        h2 { color: #10b981; margin-bottom: 30px; }
+        .input-group { text-align: left; margin-bottom: 20px; }
+        label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 5px; }
+        input { width: 100%; padding: 14px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; color: white; outline: none; transition: 0.3s; }
+        input:focus { border-color: #10b981; background: rgba(255, 255, 255, 0.08); }
+        .login-btn { width: 100%; padding: 14px; background: #10b981; color: white; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        .login-btn:hover { background: #059669; transform: translateY(-2px); }
+        #error-msg { color: #fb7185; font-size: 13px; margin-top: 15px; display: none; background: rgba(251, 113, 133, 0.1); padding: 10px; border-radius: 8px; border: 1px solid rgba(251, 113, 133, 0.2); }
+    </style>
+</head>
+<body>
+    <div id="loader-wrapper"><div class="loader"></div><div class="loader-text">Smart Edu yuklanmoqda...</div></div>
+
+    <div class="login-card">
+        <h2>Tizimga kirish</h2>
+        <div class="input-group"><label>Login</label><input type="text" id="username" placeholder="Loginni kiriting"></div>
+        <div class="input-group"><label>Parol</label><input type="password" id="password" placeholder="••••••••"></div>
+        <button class="login-btn" onclick="handleLogin()">Tizimga kirish</button>
+        <div id="error-msg">Login yoki parol xato!</div>
+    </div>
+
+    <script>
+        // Admin panelidagi default ma'lumotlar bilan bir xil bo'lishi shart
+        const defaultUsers = [
+            { login: "admin", pass: "777", role: "admin", fullName: "Bosh Admin" },
+            { login: "oqi", pass: "123", role: "teacher", fullName: "Olimova Gulnoza", info: "Matematika" },
+            { login: "ali", pass: "123", role: "student", fullName: "Aliyev Umar", info: "9-A Sinf" },
+            { login: "ali_ota", pass: "123", role: "parent", fullName: "Aliyev Rustam", info: "ali" }
+        ];
+
+        window.onload = () => {
+            // Agar baza bo'sh bo'lsa, default foydalanuvchilarni yuklaymiz
+            if(!localStorage.getItem('usersList')) {
+                localStorage.setItem('usersList', JSON.stringify(defaultUsers));
+            }
+            setTimeout(() => document.getElementById("loader-wrapper").classList.add("loader-hidden"), 800);
+        };
+
+        function handleLogin() {
+            const u = document.getElementById('username').value.trim();
+            const p = document.getElementById('password').value.trim();
+            const errorDiv = document.getElementById('error-msg');
+            
+            // LocalStorage'dan eng oxirgi bazani olamiz (Admindan qo'shilganlar ham shu yerda)
+            const users = JSON.parse(localStorage.getItem('usersList')) || [];
+            
+            // Foydalanuvchini qidirish
+            const found = users.find(x => x.login === u && x.pass === p);
+
+            if(found) {
+                errorDiv.style.display = 'none';
+                document.getElementById("loader-wrapper").classList.remove("loader-hidden");
+                
+                // Kirgan foydalanuvchini eslab qolish
+                localStorage.setItem('currentUser', JSON.stringify(found));
+                
+                // 0.6 soniyadan keyin tegishli sahifaga o'tish
+                setTimeout(() => {
+                    window.location.href = found.role + '.html';
+                }, 600);
+            } else {
+                errorDiv.style.display = 'block';
+                // Xato bo'lganda parolni tozalash
+                document.getElementById('password').value = "";
+            }
+        }
+
+        // Enter tugmasini bosganda ham kirish
+        document.addEventListener('keypress', (e) => {
+            if(e.key === 'Enter') handleLogin();
+        });
+    </script>
+</body>
+</html>

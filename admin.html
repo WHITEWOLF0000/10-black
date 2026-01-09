@@ -469,7 +469,7 @@
             rows.forEach(row => { row.style.display = row.innerText.toLowerCase().includes(val) ? "" : "none"; });
         }
 
-        function logout() { localStorage.removeItem('currentUser'); window.location.href = 'login.html'; }
+        function logout() { localStorage.removeItem('currentUser'); window.location.href = 'index.html'; }
 
         window.onload = function () {
             renderUsers();
