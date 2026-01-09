@@ -59,7 +59,7 @@
         /* --- SIDEBAR --- */
         .sidebar {
             width: 280px;
-            background: rgba(255, 255, 255, 0.03);
+            background: rgba(15, 23, 42, 0.98);
             backdrop-filter: blur(10px);
             border-right: 1px solid rgba(255, 255, 255, 0.1);
             padding: 30px;
@@ -67,6 +67,8 @@
             height: 100vh;
             display: flex;
             flex-direction: column;
+            z-index: 1000;
+            transition: 0.3s ease;
         }
 
         .sidebar h2 {
@@ -141,11 +143,12 @@
             text-align: center;
         }
 
-        /* Main Content */
+        /* --- MAIN CONTENT --- */
         .main-content {
             flex: 1;
             margin-left: 280px;
             padding: 40px;
+            transition: 0.3s;
         }
 
         .glass-card {
@@ -156,7 +159,6 @@
             margin-bottom: 25px;
         }
 
-        /* Stats */
         .stat-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -187,25 +189,9 @@
             color: #10b981;
         }
 
-        /* Table Design */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th {
-            padding: 15px;
-            color: #94a3b8;
-            font-size: 12px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            text-transform: uppercase;
-        }
-
-        td {
-            padding: 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            text-align: center;
-        }
+        table { width: 100%; border-collapse: collapse; }
+        th { padding: 15px; color: #94a3b8; font-size: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); text-transform: uppercase; }
+        td { padding: 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); text-align: center; }
 
         .grade-badge {
             display: inline-block;
@@ -220,12 +206,8 @@
             box-shadow: 0 4px 15px rgba(16, 185, 129, 0.1);
         }
 
-        .no-grade {
-            color: #475569;
-            font-style: italic;
-        }
+        .no-grade { color: #475569; font-style: italic; }
 
-        /* Camera Feed Styles */
         .camera-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -267,35 +249,12 @@
             background: radial-gradient(circle, #1e293b 0%, #0f172a 100%);
         }
 
-        /* Schedule */
-        .time-cell {
-            color: #10b981;
-            font-weight: 600;
-            background: rgba(16, 185, 129, 0.05);
-            width: 120px;
-        }
+        .time-cell { color: #10b981; font-weight: 600; background: rgba(16, 185, 129, 0.05); width: 120px; }
+        .break-row { background: rgba(245, 158, 11, 0.05); color: #f59e0b; font-size: 12px; font-weight: 600; }
+        .subject-box { display: block; font-weight: 600; font-size: 14px; }
 
-        .break-row {
-            background: rgba(245, 158, 11, 0.05);
-            color: #f59e0b;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .subject-box {
-            display: block;
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .section {
-            display: none;
-        }
-
-        .section.active {
-            display: block;
-            animation: fadeIn 0.6s ease-out;
-        }
+        .section { display: none; }
+        .section.active { display: block; animation: fadeIn 0.6s ease-out; }
 
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(15px); }
@@ -311,21 +270,47 @@
             transition: 0.3s;
         }
         
-        .msg-item:hover {
-            background: rgba(255, 255, 255, 0.05);
-            transform: translateX(5px);
+        .msg-item:hover { background: rgba(255, 255, 255, 0.05); transform: translateX(5px); }
+
+        /* --- MOBIL QO'SHIMCHALAR --- */
+        .mobile-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            z-index: 1001;
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-toggle { display: block; }
+            .sidebar { transform: translateX(-100%); width: 260px; }
+            .sidebar.active { transform: translateX(0); }
+            .main-content { margin-left: 0; padding: 20px; padding-top: 80px; }
+            .stat-grid { grid-template-columns: 1fr; }
+            .camera-grid { grid-template-columns: 1fr; }
+            .glass-card { overflow-x: auto; padding: 20px; }
+            table { min-width: 500px; }
         }
     </style>
 </head>
 
 <body>
 
+    <button class="mobile-toggle" onclick="toggleSidebar()">☰ Menyu</button>
+
     <div id="loader-wrapper">
         <div class="loader"></div>
         <div class="loader-text" style="margin-top: 15px;">Farzandingiz ma'lumotlari yuklanmoqda...</div>
     </div>
 
-    <div class="sidebar">
+    <div class="sidebar" id="sidebar">
         <h2>SMART PARENT</h2>
 
         <div class="child-profile">
@@ -403,17 +388,10 @@
                     </div>
                 </div>
             </div>
-            
-            <div class="glass-card" style="margin-top: 25px; border-left: 4px solid #10b981;">
-                <p style="font-size: 13px; color: #94a3b8;">
-                    <b>Eslatma:</b> Xavfsizlik yuzasidan kameralar faqat dars vaqtida (08:30 dan 16:00 gacha) faol bo'ladi.
-                </p>
-            </div>
         </div>
 
         <div id="schedule" class="section">
             <h1>📅 Dars jadvali</h1>
-            <p style="color: #94a3b8; margin-bottom: 25px;">Farzandingizning haftalik dars vaqtlari</p>
             <div class="glass-card" style="overflow-x: auto;">
                 <table>
                     <thead>
@@ -454,14 +432,6 @@
                             <td><span class="subject-box">Matematika</span></td>
                             <td><span class="subject-box">Biologiya</span></td>
                         </tr>
-                        <tr>
-                            <td class="time-cell">11:35 - 12:20</td>
-                            <td><span class="subject-box">Ona tili</span></td>
-                            <td><span class="subject-box">Biologiya</span></td>
-                            <td><span class="subject-box">Adabiyot</span></td>
-                            <td><span class="subject-box">Kimyo</span></td>
-                            <td><span class="subject-box">Geometriya</span></td>
-                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -472,18 +442,7 @@
             <div class="glass-card">
                 <div class="msg-item">
                     <h4 style="color:#10b981">Chorak yakuni yaqinlashmoqda</h4>
-                    <p style="color:#94a3b8; font-size: 13px;">Farzandingizning yakuniy imtihonlariga tayyorgarligini nazorat qiling.</p>
-                    <small style="color: #475569;">Bugun, 09:45</small>
-                </div>
-                <div class="msg-item" style="border-left-color: #f59e0b;">
-                    <h4 style="color:#f59e0b">Ota-onalar majlisi</h4>
-                    <p style="color:#94a3b8; font-size: 13px;">Kelasi juma soat 17:00 da maktab zalida majlis bo'lib o'tadi.</p>
-                    <small style="color: #475569;">Kecha, 14:20</small>
-                </div>
-                <div class="msg-item" style="border-left-color: #3b82f6;">
-                    <h4 style="color:#3b82f6">Yangi to'garak</h4>
-                    <p style="color:#94a3b8; font-size: 13px;">Maktabimizda "Robototexnika" to'garagi o'z faoliyatini boshladi.</p>
-                    <small style="color: #475569;">2 kun oldin</small>
+                    <p style="color:#94a3b8; font-size: 13px;">Tayyorgarlikni nazorat qiling.</p>
                 </div>
             </div>
         </div>
@@ -492,6 +451,11 @@
     <script>
         const days = ['mon', 'tue', 'wed', 'thu', 'fri'];
 
+        // Mobil sidebar funksiyasi
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+        }
+
         function getStudentsFromBase() {
             const allUsers = JSON.parse(localStorage.getItem('usersList')) || [];
             return allUsers.filter(u => u.role === 'student');
@@ -499,23 +463,18 @@
 
         window.onload = function () {
             const user = JSON.parse(localStorage.getItem('currentUser'));
-
             if (!user || user.role !== 'parent') {
                 window.location.href = 'index.html';
                 return;
             }
 
             document.getElementById('parentName').innerText = "Assalomu alaykum, " + user.fullName + "!";
-
             const students = getStudentsFromBase();
             const myChild = students.find(s => s.login === user.info);
 
             if (myChild) {
                 document.getElementById('sidebarChildName').innerText = myChild.fullName;
-                document.getElementById('childClassInfo').innerText = "Smart Edu o'quvchisi";
                 renderChildStats(user.info, students);
-            } else {
-                document.getElementById('sidebarChildName').innerText = "O'quvchi topilmadi";
             }
 
             setTimeout(() => {
@@ -526,7 +485,6 @@
         function renderChildStats(childLogin, students) {
             const journal = JSON.parse(localStorage.getItem('journalData')) || {};
             const grades = journal[childLogin] || {};
-
             let sum = 0, count = 0;
             const html = days.map(day => {
                 const val = grades[day];
@@ -537,23 +495,9 @@
                 }
                 return `<td><span class="no-grade">—</span></td>`;
             }).join('');
-
             document.getElementById('childGradesBody').innerHTML = `<tr>${html}</tr>`;
-
             const avg = count > 0 ? (sum / count).toFixed(1) : "0.0";
             document.getElementById('childAvg').innerText = avg;
-
-            const ranking = students.map(s => {
-                const sGrades = journal[s.login] || {};
-                let sSum = 0, sCount = 0;
-                days.forEach(d => {
-                    if (sGrades[d] && sGrades[d] !== "") { sSum += Number(sGrades[d]); sCount++; }
-                });
-                return { login: s.login, avg: sCount > 0 ? (sSum / sCount) : 0 };
-            }).sort((a, b) => b.avg - a.avg);
-
-            const rank = ranking.findIndex(r => r.login === childLogin) + 1;
-            document.getElementById('childRank').innerText = rank > 0 ? rank + "-o'rin" : "--";
         }
 
         function switchTab(id, el) {
@@ -561,6 +505,11 @@
             document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             el.classList.add('active');
+            
+            // Telefonda menyu bosilganda yopilishi uchun
+            if (window.innerWidth <= 768) {
+                toggleSidebar();
+            }
         }
 
         function logout() {
