@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>O'quvchi Paneli | Smart Edu</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <title>O'quvchi Paneli | E-sinf</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body { min-height: 100vh; background: #0f172a; color: #f8fafc; display: flex; flex-direction: row; }
 
-        /* --- LOADER STYLE --- */
+        /* --- LOADER --- */
         #loader-wrapper {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #0f172a; display: flex; flex-direction: column;
@@ -24,7 +24,7 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .loader-hidden { opacity: 0; visibility: hidden; }
 
-        /* --- SIDEBAR (Desktop) --- */
+        /* --- SIDEBAR --- */
         .sidebar { 
             width: 280px; background: rgba(15, 23, 42, 0.95); 
             backdrop-filter: blur(10px); border-right: 1px solid rgba(255, 255, 255, 0.1); 
@@ -37,7 +37,7 @@
         .nav-link.active { background: rgba(16, 185, 129, 0.1); color: #10b981; font-weight: 600; }
         .logout-btn { color: #fb7185; border: 1px solid rgba(251, 113, 133, 0.2); margin-top: auto; margin-bottom: 20px; text-align: center;}
 
-        /* --- MOBILE TOGGLE --- */
+        /* --- MOBILE --- */
         .mobile-header {
             display: none; position: fixed; top: 0; left: 0; width: 100%;
             background: #0f172a; padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.1);
@@ -45,7 +45,7 @@
         }
         .menu-btn { background: #10b981; border: none; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; }
 
-        /* --- MAIN CONTENT --- */
+        /* --- CONTENT --- */
         .main-content { flex: 1; margin-left: 280px; padding: 40px; transition: 0.3s; width: 100%; }
         .glass-card { 
             background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); 
@@ -59,16 +59,23 @@
         .stat-card p { font-size: 28px; font-weight: 600; color: #10b981; }
 
         /* Tables */
-        table { width: 100%; border-collapse: collapse; min-width: 500px; }
+        table { width: 100%; border-collapse: collapse; min-width: 700px; } /* Jadval kengroq bo'ldi */
         th { text-align: center; padding: 15px; color: #94a3b8; font-size: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); text-transform: uppercase; }
         td { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); text-align: center; font-size: 14px; }
         
+        /* Subject Badges (Ranglar) */
+        .badge-math { background: rgba(59, 130, 246, 0.15); color: #60a5fa; padding: 5px 12px; border-radius: 8px; font-weight: 600; font-size: 13px; }
+        .badge-eng { background: rgba(168, 85, 247, 0.15); color: #c084fc; padding: 5px 12px; border-radius: 8px; font-weight: 600; font-size: 13px; }
+        .badge-lang { background: rgba(245, 158, 11, 0.15); color: #fbbf24; padding: 5px 12px; border-radius: 8px; font-weight: 600; font-size: 13px; }
+        .badge-hist { background: rgba(239, 68, 68, 0.15); color: #ef4444; padding: 5px 12px; border-radius: 8px; font-weight: 600; font-size: 13px; } /* Tarix uchun yangi stil */
+
+        .top-student-row { background: linear-gradient(90deg, rgba(16, 185, 129, 0.1), transparent); border-left: 3px solid #10b981; }
+
         /* Schedule */
         .schedule-table td { height: 70px; }
         .time-cell { color: #10b981; font-weight: 600; width: 100px; background: rgba(16, 185, 129, 0.05); }
         .time-sub { display: block; font-size: 10px; color: #64748b; font-weight: 400; }
         .subject-box { display: block; font-weight: 600; color: #f8fafc; }
-        .room-box { display: block; font-size: 11px; color: #10b981; margin-top: 4px; }
 
         .grade-badge { 
             display: inline-block; width: 40px; height: 40px; line-height: 40px; 
@@ -79,21 +86,11 @@
         .section.active { display: block; animation: fadeIn 0.5s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- RESPONSIVE MEDIA QUERIES --- */
         @media (max-width: 992px) {
             .sidebar { transform: translateX(-100%); width: 260px; }
             .sidebar.open { transform: translateX(0); }
             .mobile-header { display: flex; }
             .main-content { margin-left: 0; padding: 20px; padding-top: 80px; }
-            .stat-grid { grid-template-columns: 1fr 1fr; }
-            .glass-card { padding: 20px; }
-        }
-
-        @media (max-width: 600px) {
-            .stat-grid { grid-template-columns: 1fr; }
-            .stat-card { padding: 15px; }
-            .stat-card p { font-size: 22px; }
-            h1 { font-size: 22px; }
         }
     </style>
 </head>
@@ -101,16 +98,16 @@
 
     <div id="loader-wrapper">
         <div class="loader"></div>
-        <div class="loader-text" style="margin-top: 15px; color: #94a3b8;">Profilingiz tayyorlanmoqda...</div>
+        <div class="loader-text" style="margin-top: 15px; color: #94a3b8;">Ma'lumotlar yuklanmoqda...</div>
     </div>
 
     <div class="mobile-header">
-        <h3 style="color: #10b981;">SMART EDU</h3>
+        <h3 style="color: #10b981;">E-sinf</h3>
         <button class="menu-btn" onclick="toggleMenu()">☰ Menyu</button>
     </div>
 
     <div class="sidebar" id="sidebar">
-        <h2>SMART EDU</h2>
+        <h2>E-sinf</h2>
         <div class="nav-link active" onclick="switchTab('dashboard', this)">🏠 Baholarim</div>
         <div class="nav-link" onclick="switchTab('schedule', this)">📅 Dars jadvali</div>
         <div class="nav-link" onclick="switchTab('rating', this)">📊 Sinf reytingi</div>
@@ -121,30 +118,28 @@
     <div class="main-content">
         <div id="dashboard" class="section active">
             <h1 id="studentName">Salom!</h1>
-            <p style="color: #94a3b8; margin-bottom: 25px;">Bugungi natijalaringiz</p>
+            <p style="color: #94a3b8; margin-bottom: 25px;">Sizning umumiy natijalaringiz</p>
 
             <div class="stat-grid">
                 <div class="stat-card">
-                    <h3>O'rtacha</h3>
+                    <h3>Umumiy O'rtacha</h3>
                     <p id="avgDisplay">0.0</p>
                 </div>
                 <div class="stat-card">
-                    <h3>O'rningiz</h3>
+                    <h3>Sinfdagi O'rningiz</h3>
                     <p id="rankDisplay">--</p>
                 </div>
                 <div class="stat-card">
-                    <h3>Faollik</h3>
-                    <p style="color: #f59e0b;">A'lo</p>
+                    <h3>Matematika</h3>
+                    <p id="mathDisplay" style="color: #60a5fa;">0.0</p>
                 </div>
             </div>
 
             <div class="glass-card">
-                <h3 style="margin-bottom: 20px; font-size: 16px; color: #10b981;">Haftalik baholar</h3>
+                <h3 style="margin-bottom: 20px; font-size: 16px; color: #10b981;">Matematika (Joriy hafta)</h3>
                 <table>
                     <thead>
-                        <tr>
-                            <th>Du</th><th>Se</th><th>Ch</th><th>Pa</th><th>Ju</th>
-                        </tr>
+                        <tr><th>Du</th><th>Se</th><th>Ch</th><th>Pa</th><th>Ju</th></tr>
                     </thead>
                     <tbody id="studentGradesBody"></tbody>
                 </table>
@@ -156,26 +151,88 @@
             <div class="glass-card">
                 <table class="schedule-table">
                     <thead>
-                        <tr>
-                            <th>Vaqt</th><th>Du</th><th>Se</th><th>Ch</th><th>Pa</th><th>Ju</th>
-                        </tr>
+                        <tr><th>Vaqt</th><th>Du</th><th>Se</th><th>Ch</th><th>Pa</th><th>Ju</th></tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td class="time-cell">1-dars <span class="time-sub">08:30</span></td>
-                            <td><span class="subject-box">Matem.</span></td>
+                            <td class="time-cell">1-dars <span class="time-sub">08:30-09:15</span></td>
+                            <td><span class="subject-box">Ingliz tili</span></td>
+                            <td><span class="subject-box">Ingliz tili</span></td>
                             <td><span class="subject-box">Ona tili</span></td>
-                            <td><span class="subject-box">Fizika</span></td>
-                            <td><span class="subject-box">Tarix</span></td>
-                            <td><span class="subject-box">Ingliz</span></td>
+                            <td><span class="subject-box">Ingliz tili</span></td>
+                            <td><span class="subject-box">Matematika</span></td>
                         </tr>
                         <tr>
-                            <td class="time-cell">2-dars <span class="time-sub">09:25</span></td>
-                            <td><span class="subject-box">Matem.</span></td>
-                            <td><span class="subject-box">Kimyo</span></td>
+                            <td class="time-cell">2-dars <span class="time-sub">09:20-10:05</span></td>
+                            <td><span class="subject-box">Kelajak soati</span></td>
+                            <td><span class="subject-box">Tarix</span></td>
+                            <td><span class="subject-box">Matematika</span></td>
+                            <td><span class="subject-box">Matematika</span></td>
+                            <td><span class="subject-box">Ingliz tili</span></td>
+                        </tr>
+                        <tr>
+                            <td class="time-cell">3-dars <span class="time-sub">10:10-10:55</span></td>
+                            <td><span class="subject-box">Matematika</span></td>
+                            <td><span class="subject-box">Ingliz tili</span></td>
+                            <td><span class="subject-box">Matematika</span></td>
+                            <td><span class="subject-box">Ingliz tili</span></td>
+                            <td><span class="subject-box">Ingliz tili</span></td>
+                        </tr>
+                        <tr>
+                            <td class="time-cell">4-dars <span class="time-sub">11:00-11:45</span></td>
+                            <td><span class="subject-box">Matematika</span></td>
+                            <td><span class="subject-box">Matematika</span></td>
+                            <td><span class="subject-box">Tarix</span></td>
+                            <td><span class="subject-box">Ona tili</span></td>
+                            <td><span class="subject-box">Matematika</span></td>
+                        </tr>
+                        <tr>
+                            <td class="time-cell">5-dars <span class="time-sub">11:50-12:30</span></td>
+                            <td><span class="subject-box">Iqtisod</span></td>
+                            <td><span class="subject-box">Ma'naviyat</span></td>
+                            <td><span class="subject-box">Ona tili</span></td>
+                            <td><span class="subject-box">Chizmachilik</span></td>
+                            <td><span class="subject-box">Tarix</span></td>
+                        </tr>
+                        <tr style="background: rgba(16, 185, 129, 0.1);">
+                            <td class="time-cell" style="color: #fbbf24;">Tanaffus</td>
+                            <td colspan="5" style="text-align: center; font-weight: bold; color: #fbbf24; letter-spacing: 2px;">TUSHLIK VA DAM OLISH (45 MINUT)</td>
+                        </tr>
+                        <tr>
+                            <td class="time-cell">6-dars <span class="time-sub">13:15-13:55</span></td>
+                            <td><span class="subject-box">Adabiyot</span></td>
                             <td><span class="subject-box">Geom.</span></td>
-                            <td><span class="subject-box">Sport</span></td>
                             <td><span class="subject-box">Rus tili</span></td>
+                            <td><span class="subject-box">Fizika</span></td>
+                            <td><span class="subject-box">Sport</span></td>
+                        </tr>
+                        <tr>
+                            <td class="time-cell">7-dars <span class="time-sub">14:00-14:40</span></td>
+                            <td><span class="subject-box">To'garak</span></td>
+                            <td><span class="subject-box">Loyiha</span></td>
+                            <td><span class="subject-box">Mustaqil ish</span></td>
+                            <td><span class="subject-box">To'garak</span></td>
+                            <td><span class="subject-box">Loyiha</span></td>
+                        </tr>
+                        <tr>
+                            <td class="time-cell">8-dars <span class="time-sub">14:45-15:25</span></td>
+                            <td><span class="subject-box">Debat</span></td>
+                            <td><span class="subject-box">Nutq mad.</span></td>
+                            <td><span class="subject-box">Soft Skills</span></td>
+                            <td><span class="subject-box">Psixologiya</span></td>
+                            <td><span class="subject-box">Mantiq</span></td>
+                        </tr>
+                        <tr style="background: rgba(16, 185, 129, 0.1);">
+                            <td class="time-cell" style="color: #fbbf24;">Tanaffus</td>
+                            <td colspan="5" style="text-align: center; font-weight: bold; color: #fbbf24; letter-spacing: 2px;">KATTA TANAFFUS (30 MINUT)</td>
+                        </tr>
+                        <tr>
+                            <td class="time-cell">9-dars <span class="time-sub">15:55-16:35</span></td>
+                            <td><span class="subject-box">Kutubxona</span></td>
+                            <td><span class="subject-box">Sport</span></td>
+                            <td><span class="subject-box">Kutubxona</span></td>
+                            <td><span class="subject-box">Loyiha</span></td>
+                            <td><span class="subject-box">Yakuniy</span></td>
                         </tr>
                     </tbody>
                 </table>
@@ -183,14 +240,18 @@
         </div>
 
         <div id="rating" class="section">
-            <h1>📊 Sinf Reytingi</h1>
+            <h1>📊 Sinf Reytingi (Fanlar kesimida)</h1>
+            <p style="color: #94a3b8; margin-bottom: 25px;">Barcha fanlar bo'yicha eng yuqori natijalar</p>
             <div class="glass-card">
                 <table id="ratingTable">
                     <thead>
                         <tr>
                             <th style="width: 50px;">#</th>
-                            <th style="text-align: left;">Ism</th>
-                            <th>Ball</th>
+                            <th style="text-align: left;">O'quvchi</th>
+                            <th>Matem</th>
+                            <th>Ingliz</th>
+                            <th>Ona tili</th>
+                            <th>Tarix</th> <th style="color: #10b981; font-weight: 700;">O'rtacha</th>
                         </tr>
                     </thead>
                     <tbody id="fullRatingBody"></tbody>
@@ -201,7 +262,7 @@
         <div id="exams" class="section">
             <h1>📝 Imtihonlar</h1>
             <div class="glass-card">
-                <p style="color: #94a3b8; text-align: center; padding: 20px;">Hozircha imtihonlar yo'q.</p>
+                <p style="color: #94a3b8; text-align: center; padding: 20px;">Yaqin orada imtihonlar yo'q.</p>
             </div>
         </div>
     </div>
@@ -218,9 +279,21 @@
             return allUsers.filter(u => u.role === 'student');
         }
 
+        // Simulyatsiya: Har bir fan uchun stabil ball
+        function getPseudoScore(str, subject) {
+            let hash = 0;
+            const seed = subject + str; 
+            for (let i = 0; i < seed.length; i++) {
+                hash = seed.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            // 3.0 dan 5.0 gacha ball
+            const score = 3 + Math.abs(hash % 20) / 10; 
+            return score > 5 ? 5 : score; 
+        }
+
         window.onload = function() {
             const user = JSON.parse(localStorage.getItem('currentUser'));
-            if (!user) { window.location.href = 'index.html'; return; }
+            if (!user) { window.location.href = 'login.html'; return; }
             
             document.getElementById('studentName').innerText = "Salom, " + user.fullName.split(' ')[0] + "!";
             renderStudentData(user.login);
@@ -235,32 +308,71 @@
             const journal = JSON.parse(localStorage.getItem('journalData')) || {};
             
             const ratingList = students.map(s => {
+                // 1. Matematika (Real)
                 const sGrades = journal[s.login] || {};
                 let sSum = 0, sCount = 0;
                 days.forEach(d => { 
                     if(sGrades[d]) { sSum += Number(sGrades[d]); sCount++; } 
                 });
+                const mathScore = sCount > 0 ? (sSum / sCount) : 0;
+
+                // 2. Boshqa fanlar (Simulyatsiya)
+                // Agar o'quvchining matematikada bahosi bo'lmasa, boshqalarini ham 0 qilamiz (chiroyli ko'rinish uchun)
+                const isActive = mathScore > 0;
+                
+                const engScore = isActive ? getPseudoScore(s.login, 'eng') : 0;
+                const langScore = isActive ? getPseudoScore(s.login, 'lang') : 0;
+                const histScore = isActive ? getPseudoScore(s.login, 'hist') : 0; // Tarix balli
+
+                // 3. Umumiy ball (4 ta fandan o'rtacha)
+                const totalAvg = isActive ? (mathScore + engScore + langScore + histScore) / 4 : 0;
+
                 return { 
                     login: s.login, 
                     fullName: s.fullName, 
-                    avg: sCount > 0 ? (sSum / sCount) : 0 
+                    math: mathScore,
+                    eng: engScore,
+                    lang: langScore,
+                    hist: histScore, // Tarix
+                    total: totalAvg
                 };
-            }).sort((a, b) => b.avg - a.avg);
+            });
 
-            document.getElementById('fullRatingBody').innerHTML = ratingList.map((s, i) => `
-                <tr style="${s.login === currentLogin ? 'background:rgba(16,185,129,0.1);' : ''}">
-                    <td>#${i + 1}</td>
-                    <td style="text-align:left">${s.fullName.split(' ')[0]} ${s.login === currentLogin ? '⭐' : ''}</td>
-                    <td style="color:#10b981; font-weight:600">${s.avg.toFixed(1)}</td>
+            // Saralash
+            ratingList.sort((a, b) => b.total - a.total);
+
+            // Jadvalni chizish
+            document.getElementById('fullRatingBody').innerHTML = ratingList.map((s, i) => {
+                const isMe = s.login === currentLogin;
+                const rowClass = (i === 0) ? 'top-student-row' : ''; 
+                const medal = (i === 0) ? '🥇' : (i === 1) ? '🥈' : (i === 2) ? '🥉' : '';
+
+                return `
+                <tr class="${rowClass}" style="${isMe ? 'background:rgba(255,255,255,0.05);' : ''}">
+                    <td>${medal || (i + 1)}</td>
+                    <td style="text-align:left; font-weight: ${isMe ? 'bold' : 'normal'}">
+                        ${s.fullName} ${isMe ? '(Siz)' : ''}
+                    </td>
+                    <td><span class="badge-math">${s.math > 0 ? s.math.toFixed(1) : '-'}</span></td>
+                    <td><span class="badge-eng">${s.eng > 0 ? s.eng.toFixed(1) : '-'}</span></td>
+                    <td><span class="badge-lang">${s.lang > 0 ? s.lang.toFixed(1) : '-'}</span></td>
+                    <td><span class="badge-hist">${s.hist > 0 ? s.hist.toFixed(1) : '-'}</span></td>
+                    <td style="color:#10b981; font-weight:700; font-size:16px;">${s.total > 0 ? s.total.toFixed(2) : '0.0'}</td>
                 </tr>
-            `).join('');
+                `;
+            }).join('');
 
-            const myRank = ratingList.findIndex(s => s.login === currentLogin) + 1;
+            // Shaxsiy statistika
             const myData = ratingList.find(s => s.login === currentLogin);
+            const myRank = ratingList.findIndex(s => s.login === currentLogin) + 1;
             
-            document.getElementById('avgDisplay').innerText = myData ? myData.avg.toFixed(1) : "0.0";
-            document.getElementById('rankDisplay').innerText = myRank > 0 ? myRank + "-o'rin" : "--";
+            if (myData) {
+                document.getElementById('avgDisplay').innerText = myData.total.toFixed(2);
+                document.getElementById('rankDisplay').innerText = myRank > 0 ? myRank + "-o'rin" : "--";
+                document.getElementById('mathDisplay').innerText = myData.math > 0 ? myData.math.toFixed(1) : "0.0";
+            }
 
+            // Haftalik baholar (Matematika)
             const myGrades = journal[currentLogin] || {};
             const gradesHTML = days.map(day => {
                 const val = myGrades[day];
@@ -274,17 +386,14 @@
             document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             el.classList.add('active');
-            
-            // Mobil menyuni yopish
             document.getElementById('sidebar').classList.remove('open');
-            
             const user = JSON.parse(localStorage.getItem('currentUser'));
             if(user) renderStudentData(user.login);
         }
 
         function logout() {
             localStorage.removeItem('currentUser');
-            window.location.href = 'index.html';
+            window.location.href = 'login.html';
         }
     </script>
 </body>

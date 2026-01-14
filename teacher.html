@@ -124,7 +124,7 @@
     </div>
 
     <div class="sidebar" id="sidebar">
-        <h2>SMART EDU</h2>
+        <h2>E-sinf</h2>
         <div class="nav-link active" onclick="switchTab('home', this)">🏠 Jurnal</div>
         <div class="nav-link" onclick="switchTab('attendance', this)">✅ Davomat</div>
         <div class="nav-link" onclick="switchTab('rating', this)">📊 Reyting</div>
@@ -258,7 +258,7 @@
         window.onload = function() {
             const user = JSON.parse(localStorage.getItem('currentUser'));
             if (!user || user.role !== 'teacher') {
-                window.location.href = 'index.html';
+                window.location.href = 'login.html';
                 return;
             }
             document.getElementById('todayDateDisplay').innerText = "Bugun: " + new Date().toLocaleDateString('uz-UZ');
@@ -350,7 +350,7 @@
 
         function logout() { 
             localStorage.removeItem('currentUser'); 
-            window.location.href = 'index.html'; 
+            window.location.href = 'login.html'; 
         }
     </script>
 </body>

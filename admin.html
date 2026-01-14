@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Paneli | Smart Edu</title>
+    <title>Admin Paneli | E-sinf</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         * {
@@ -469,7 +469,7 @@
             rows.forEach(row => { row.style.display = row.innerText.toLowerCase().includes(val) ? "" : "none"; });
         }
 
-        function logout() { localStorage.removeItem('currentUser'); window.location.href = 'index.html'; }
+        function logout() { localStorage.removeItem('currentUser'); window.location.href = 'login.html'; }
 
         window.onload = function () {
             renderUsers();
