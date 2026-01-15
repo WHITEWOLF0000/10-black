@@ -247,6 +247,23 @@
             align-items: center;
             color: #334155;
             background: radial-gradient(circle, #1e293b 0%, #0f172a 100%);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1;
+        }
+
+        /* Yangi Video stili */
+        #liveVideo1 {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 0;
+            display: none; /* Boshida ko'rinmaydi */
         }
 
         .time-cell { color: #10b981; font-weight: 600; background: rgba(16, 185, 129, 0.05); width: 120px; }
@@ -316,7 +333,7 @@
         <div class="child-profile">
             <div class="child-avatar">🎓</div>
             <div class="child-name" id="sidebarChildName">Yuklanmoqda...</div>
-            <div class="child-role" id="childClassInfo">O'quvchi</div>
+            <div class="child-role" id="childClassInfo">10-black o'quvchisi</div>
         </div>
 
         <div class="nav-link active" onclick="switchTab('overview', this)">🏠 Asosiy panel</div>
@@ -371,11 +388,14 @@
             
             <div class="camera-grid">
                 <div class="cam-box">
-                    <div class="cam-status">● LIVE</div>
-                    <div class="cam-placeholder">
+                    <div id="camStatus1" class="cam-status">● CONNECTING...</div>
+                    
+                    <video id="liveVideo1" autoplay muted playsinline></video>
+                    
+                    <div id="camPlaceholder1" class="cam-placeholder">
                         <span style="font-size: 40px; margin-bottom: 10px;">📹</span>
                         <p style="color: #64748b;">1-Kamera: Sinf xonasi</p>
-                        <small style="color: #475569;">Ulanmoqda...</small>
+                        <small id="camNote1" style="color: #475569;">Ulanmoqda...</small>
                     </div>
                 </div>
                 
@@ -450,6 +470,7 @@
 
     <script>
         const days = ['mon', 'tue', 'wed', 'thu', 'fri'];
+        let stream = null; // Kamera oqimini saqlash uchun o'zgaruvchi
 
         // Mobil sidebar funksiyasi
         function toggleSidebar() {
@@ -462,6 +483,11 @@
         }
 
         window.onload = function () {
+            // Kamera vaqtini darhol tekshirish
+            checkCameraTime();
+            // Har soniyada vaqtni tekshirishni yoqish
+            setInterval(checkCameraTime, 1000);
+
             const user = JSON.parse(localStorage.getItem('currentUser'));
             if (!user || user.role !== 'parent') {
                 window.location.href = 'index.html';
@@ -515,6 +541,105 @@
         function logout() {
             localStorage.removeItem('currentUser');
             window.location.href = 'index.html';
+        }
+
+        // --- YANGILANGAN KAMERA LOGIKASI ---
+        function checkCameraTime() {
+            const now = new Date();
+            const day = now.getDay(); // 0-Yakshanba, 6-Shanba
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const totalMinutes = hours * 60 + minutes;
+
+            let shouldBeWorking = false;
+            let noteText = "Hozir dars vaqti emas";
+
+            // VAQT MANTIQI:
+            if (day === 0) { // Yakshanba
+                shouldBeWorking = false;
+            } else if (day === 6) { // Shanba
+                if (hours < 12) {
+                    shouldBeWorking = true;
+                }
+            } else { // Dushanba - Juma
+                if (totalMinutes >= 480 && totalMinutes < 1000) { // 08:00 - 16:40
+                    shouldBeWorking = true;
+                }
+            }
+
+            const status1 = document.getElementById('camStatus1');
+            const note1 = document.getElementById('camNote1');
+
+            if (shouldBeWorking) {
+                // Agar vaqt to'g'ri bo'lsa, kamerani yoqishga harakat qilamiz
+                if (!stream) {
+                    startCamera(); // Kamera hali yonmagan bo'lsa, yoqamiz
+                } else {
+                    // Kamera allaqachon ishlayapti
+                    if (status1) {
+                        status1.innerText = "● LIVE";
+                        status1.style.background = "rgba(239, 68, 68, 0.8)";
+                        note1.innerText = "Jonli efir uzatilmoqda";
+                    }
+                }
+            } else {
+                // Agar vaqt to'g'ri kelmasa, kamerani o'chiramiz
+                stopCamera();
+                if (status1) {
+                    status1.innerText = "OFFLINE";
+                    status1.style.background = "#475569";
+                    note1.innerText = noteText;
+                }
+            }
+        }
+
+        // Kamerani ishga tushirish funksiyasi
+        async function startCamera() {
+            const videoElement = document.getElementById('liveVideo1');
+            const placeholder = document.getElementById('camPlaceholder1');
+            const status1 = document.getElementById('camStatus1');
+            const note1 = document.getElementById('camNote1');
+
+            try {
+                // Brauzerdan kamera ruxsatini so'rash
+                stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                videoElement.srcObject = stream;
+                
+                // Video o'lchamlarini to'g'rilash
+                videoElement.onloadedmetadata = () => {
+                    videoElement.play();
+                    videoElement.style.display = 'block'; // Videoni ko'rsatish
+                    placeholder.style.display = 'none'; // Rasmni yashirish
+                };
+                
+            } catch (err) {
+                // Agar ruxsat berilmasa yoki kamera bo'lmasa
+                console.error("Kamera xatosi:", err);
+                stopCamera(); // Tozalash
+                
+                status1.innerText = "SIGNAL YO'Q";
+                status1.style.background = "#f59e0b"; // Sariq rang
+                note1.innerText = "Kameraga ulanib bo'lmadi (Ruxsat yo'q)";
+            }
+        }
+
+        // Kamerani to'xtatish funksiyasi
+        function stopCamera() {
+            const videoElement = document.getElementById('liveVideo1');
+            const placeholder = document.getElementById('camPlaceholder1');
+
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            }
+
+            if (videoElement) {
+                videoElement.style.display = 'none';
+                videoElement.srcObject = null;
+            }
+            if (placeholder) {
+                placeholder.style.display = 'flex';
+            }
         }
     </script>
 </body>
